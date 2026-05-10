@@ -19,11 +19,14 @@ const pool = mysql.createPool({
 const testConnection = async () => {
   try {
     const connection = await pool.getConnection();
-    console.log('✅ Database connected successfully');
+    console.log('MySQL connected');
     connection.release();
   } catch (error) {
-    console.error('❌ Database connection failed:', error.message);
-    process.exit(1);
+    console.warn('Running without database connection');
+    if (process.env.NODE_ENV !== 'production') {
+      console.debug('Database connection error:', error);
+    }
+    // Do not exit the process — allow the server to start without DB
   }
 };
 
