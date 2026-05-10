@@ -29,12 +29,9 @@ const societyRoutes = require('./src/routes/societyRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 
-// Initialize databases
+// Initialize databases (non-blocking; failures should not stop the server)
 const pool = require('./src/config/database');
 const { connectMongoDB } = require('./src/config/mongodb');
-
-// Connect to MongoDB (secondary)
-connectMongoDB();
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -55,6 +52,10 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  // Attempt to connect to MongoDB but do not block server startup
+  connectMongoDB();
 });
+
+module.exports = server;
