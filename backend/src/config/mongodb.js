@@ -6,20 +6,23 @@ dotenv.config();
 const connectMongoDB = async () => {
   try {
     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/campus_connekt';
+    // Recommended production-safe options
     await mongoose.connect(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
       maxPoolSize: 10,
       family: 4,
-      tls: true,
-      tlsAllowInvalidCertificates: true, // Allow invalid certificates for testing
-      tlsAllowInvalidHostnames: true,   // Allow invalid hostnames for testing
     });
-    console.log('✅ MongoDB connected successfully');
+    console.log('MongoDB connected');
   } catch (error) {
-    console.error('❌ MongoDB connection failed:', error.message);
-    console.error('Full error:', error);
-    // Don't exit process - MongoDB is secondary
+    console.warn('Running without database connection');
+    if (process.env.NODE_ENV !== 'production') {
+      // In non-production, surface the underlying error for debugging
+      console.debug('MongoDB connection error:', error);
+    }
+    // Do not rethrow or exit — allow the server to run without DB
   }
 };
 
